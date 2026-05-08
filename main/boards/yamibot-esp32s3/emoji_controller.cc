@@ -641,27 +641,26 @@ AnimationType EmojiController::SelectRandomAnimation() {
     uint32_t random_value = esp_random() % 100;
     
     // 根据概率分布选择动画类型
-    // 眨眼: 60%
-    // 向左看: 15%
-    // 向右看: 15%
-    // 转圈: 5%
-    // 疑惑: 5%
     if (random_value < 60) {
-        // 60%概率：眨眼
-        return AnimationType::BLINK;
-    } else if (random_value < 78) {
-        // 18%概率：向左看
-        return AnimationType::LOOK_LEFT;
+        return AnimationType::BLINK;      // 60%
+    } else if (random_value < 70) {
+        return AnimationType::LOOK_LEFT;  // 10%
+    } else if (random_value < 80) {
+        return AnimationType::LOOK_RIGHT; // 10%
+    } else if (random_value < 87) {
+        return AnimationType::HEAD_NOD;   // 7%
+    } else if (random_value < 92) {
+        return AnimationType::HAPPY;      // 5%
     } else if (random_value < 96) {
-        // 18%概率：向右看
-        return AnimationType::LOOK_RIGHT;
+        return AnimationType::HEAD_ROLL;  // 4%
     } else if (random_value < 98) {
-        // 2%概率：转圈
-        return AnimationType::HEAD_ROLL;
+        return AnimationType::CONFUSED;   // 2%
+    } else if (random_value < 99) {
+        return AnimationType::SURPRISE;   // 1%
     } else {
-        // 2%概率：疑惑
-        return AnimationType::CONFUSED;
+        return AnimationType::AWKWARD;    // 1%
     }
+    // SAD 和 ANGER 继续保留但不随机，留给特定场景触发
 }
 
 void EmojiController::PlayRandomAnimation() {
