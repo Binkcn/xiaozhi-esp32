@@ -238,7 +238,11 @@ private:
                 emoji_controller_->StartBlinkTimer();
                 emoji_controller_->EyeCenter();
                 GetDisplay()->ShowNotification("表情模式");
-                
+
+                // 随机表情动画
+                emoji_controller_->SetRandomAnimationEnabled(true);
+                ESP_LOGI(TAG, "表情模式，启动随机表情动画");
+
                 // 初始化舵机位置
                 servo_controller_->HeadCenter();
             } else {
@@ -248,6 +252,10 @@ private:
                 GetDisplay()->ShowNotification("对话模式");
                 emoji_controller_->CleanupEmojiScreen();
                 
+                // 停止随机表情动画
+                emoji_controller_->SetRandomAnimationEnabled(false);
+                ESP_LOGI(TAG, "对话模式，停止随机表情动画");
+
                 // 舵机回到中心位置
                 servo_controller_->HeadCenter();
             }
@@ -540,12 +548,6 @@ static void StateMonitorTask(void* arg) {
     DeviceState last_state = kDeviceStateIdle;
     TickType_t last_speak_end_time = 0;
     bool in_conversation = false;
-    
-    // 确保初始状态下随机动画是启用的
-    if (board->emoji_controller_) {
-        board->emoji_controller_->SetRandomAnimationEnabled(true);
-        ESP_LOGI(TAG, "初始化：启用随机表情动画");
-    }
     
     // 监控设备状态
     while (true) {
