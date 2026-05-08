@@ -231,33 +231,10 @@ private:
         });
 
         boot_button_.OnLongPress([this]() {
-            is_emoji_mode_ = !is_emoji_mode_;
             if (is_emoji_mode_) {
-                // 进入表情模式
-                SwitchScreen(true);
-                emoji_controller_->StartBlinkTimer();
-                emoji_controller_->EyeCenter();
-                GetDisplay()->ShowNotification("表情模式");
-
-                // 随机表情动画
-                emoji_controller_->SetRandomAnimationEnabled(true);
-                ESP_LOGI(TAG, "表情模式，启动随机表情动画");
-
-                // 初始化舵机位置
-                servo_controller_->HeadCenter();
+                ExitEmojiMode();
             } else {
-                // 退出表情模式
-                emoji_controller_->StopBlinkTimer();
-                SwitchScreen(false);
-                GetDisplay()->ShowNotification("对话模式");
-                emoji_controller_->CleanupEmojiScreen();
-                
-                // 停止随机表情动画
-                emoji_controller_->SetRandomAnimationEnabled(false);
-                ESP_LOGI(TAG, "对话模式，停止随机表情动画");
-
-                // 舵机回到中心位置
-                servo_controller_->HeadCenter();
+                EnterEmojiMode();
             }
         });
 
@@ -318,6 +295,30 @@ private:
         }
     }
 
+    // 进入表情模式
+    void EnterEmojiMode() {
+        is_emoji_mode_ = true;
+        SwitchScreen(true);
+        emoji_controller_->StartBlinkTimer();
+        emoji_controller_->EyeCenter();
+        GetDisplay()->ShowNotification("表情模式");
+        emoji_controller_->SetRandomAnimationEnabled(true);
+        ESP_LOGI(TAG, "表情模式，启动随机表情动画");
+        servo_controller_->HeadCenter();
+    }
+
+    // 退出表情模式
+    void ExitEmojiMode() {
+        is_emoji_mode_ = false;
+        emoji_controller_->StopBlinkTimer();
+        SwitchScreen(false);
+        GetDisplay()->ShowNotification("对话模式");
+        emoji_controller_->CleanupEmojiScreen();
+        emoji_controller_->SetRandomAnimationEnabled(false);
+        ESP_LOGI(TAG, "对话模式，停止随机表情动画");
+        servo_controller_->HeadCenter();
+    }
+
     // 声明静态任务函数为友元函数，使其可以访问私有成员
     friend void StateMonitorTask(void* arg);
 
@@ -350,7 +351,7 @@ public:
         // 创建并初始化情感响应控制器
         emotion_controller_ = new EmotionResponseController(emoji_controller_, servo_controller_, GetAudioCodec());
         emotion_controller_->Initialize();
-        
+
         // 创建并初始化手势识别传感器
         gesture_sensor_ = new GestureSensor();
         
@@ -390,24 +391,6 @@ public:
         
         // 将自身实例赋值给全局变量
         g_board_instance = this;
-        
-        // 启动舵机测试任务（延迟2秒后执行，确保系统完全初始化）
-        xTaskCreate([](void* arg) {
-            vTaskDelay(pdMS_TO_TICKS(2000));
-            ESP_LOGI(TAG, "===== 舵机测试开始 =====");
-            ServoController* servo = static_cast<YamiBotBoard*>(arg)->servo_controller_;
-            if (servo) {
-                servo->HeadCenter();
-                vTaskDelay(pdMS_TO_TICKS(500));
-                servo->HeadNod(15);
-                vTaskDelay(pdMS_TO_TICKS(500));
-                servo->HeadShake(10);
-                vTaskDelay(pdMS_TO_TICKS(500));
-                servo->HeadCenter();
-                ESP_LOGI(TAG, "===== 舵机测试完成 =====");
-            }
-            vTaskDelete(NULL);
-        }, "servo_test", 4096, this, 1, NULL);
     }
 
 
@@ -669,7 +652,17 @@ static void StateMonitorTask(void* arg) {
                 ESP_LOGI(TAG, "对话结束，恢复中性情感");
             }
         }
-        
+
+        // 如果设备状态从activating变为idle，说明用户刚刚激活了设备
+        if (last_state == kDeviceStateActivating && current_state == kDeviceStateIdle) {
+            // 启动时默认进入表情模式
+            board->EnterEmojiMode();
+            emotion_controller->TriggerEmotion("spin");
+
+            // 处理激活逻辑
+            ESP_LOGI(TAG, "设备刚刚被激活");
+        }
+
         // 更新上一次的设备状态
         last_state = current_state;
         
