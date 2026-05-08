@@ -205,7 +205,12 @@ private:
             display_ = new NoDisplay();
             return;
         }
+
+#ifdef SH1106
+        ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, true));
+#else
         ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, false));
+#endif
 
         // Set the display to on
         ESP_LOGI(TAG, "Turning display on");
