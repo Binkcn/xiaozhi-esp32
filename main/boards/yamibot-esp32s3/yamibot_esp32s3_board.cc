@@ -373,7 +373,26 @@ public:
         
         // 将自身实例赋值给全局变量
         g_board_instance = this;
+        
+        // 启动舵机测试任务（延迟2秒后执行，确保系统完全初始化）
+        xTaskCreate([](void* arg) {
+            vTaskDelay(pdMS_TO_TICKS(2000));
+            ESP_LOGI(TAG, "===== 舵机测试开始 =====");
+            ServoController* servo = static_cast<YamiBotBoard*>(arg)->servo_controller_;
+            if (servo) {
+                servo->HeadCenter();
+                vTaskDelay(pdMS_TO_TICKS(500));
+                servo->HeadNod(15);
+                vTaskDelay(pdMS_TO_TICKS(500));
+                servo->HeadShake(10);
+                vTaskDelay(pdMS_TO_TICKS(500));
+                servo->HeadCenter();
+                ESP_LOGI(TAG, "===== 舵机测试完成 =====");
+            }
+            vTaskDelete(NULL);
+        }, "servo_test", 4096, this, 1, NULL);
     }
+
 
     ~YamiBotBoard() {
         // 停止并清理手势识别传感器
