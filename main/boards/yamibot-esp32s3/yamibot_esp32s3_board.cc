@@ -207,7 +207,8 @@ private:
         }
 
 #ifdef SH1106
-        ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, true));
+        // SH1106 驱动中的 esp_lcd_panel_invert_color 是个空函数
+        // ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, false));
 #else
         ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, false));
 #endif
