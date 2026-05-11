@@ -245,6 +245,29 @@ private:
             }
         });
 
+        boot_button_.OnMultipleClick([this]() {
+            const std::string CUSTOM_OTA_URL = "https://yamibot.binkcn.com/xiaozhi/ota/";
+            
+            Settings settings("wifi", true);
+            std::string current_url = settings.GetString("ota_url");
+            
+            if (current_url.empty()) {
+                current_url = CONFIG_OTA_URL;
+            }
+            
+            if (current_url == CONFIG_OTA_URL) {
+                // 切换到自定义OTA URL
+                settings.SetString("ota_url", CUSTOM_OTA_URL);
+                ESP_LOGI(TAG, "OTA URL 已切换到: %s", CUSTOM_OTA_URL.c_str());
+                GetDisplay()->ShowNotification("OTA: 自定义");
+            } else {
+                // 切换回默认OTA URL（删除自定义设置）
+                settings.EraseKey("ota_url");
+                ESP_LOGI(TAG, "OTA URL 已切换到默认: %s", CONFIG_OTA_URL);
+                GetDisplay()->ShowNotification("OTA: 默认");
+            }
+        }, 3);
+
         touch_button_.OnPressDown([this]() {
             Application::GetInstance().StartListening();
         });

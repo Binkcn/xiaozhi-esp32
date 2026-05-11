@@ -87,6 +87,7 @@ esp_err_t Ota::CheckVersion() {
         ESP_LOGE(TAG, "Check version URL is not properly set");
         return ESP_ERR_INVALID_ARG;
     }
+    ESP_LOGI(TAG, "Current OTA URL: %s", url.c_str());
 
     auto http = SetupHttp();
 
