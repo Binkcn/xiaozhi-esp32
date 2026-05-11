@@ -38,7 +38,7 @@ void EmojiController::Initialize() {
     BaseType_t task_created = xTaskCreate(
         AnimationTask,    // 任务函数
         "AnimationTask",  // 任务名称
-        4096,            // 堆栈大小
+        8192,            // 堆栈大小 (从4096增加到8192，因为动画函数需要大量栈空间)
         this,            // 任务参数
         5,               // 任务优先级
         &animation_task_handle_  // 任务句柄
@@ -3179,7 +3179,7 @@ void EmojiController::InitEmoji() {
         BaseType_t task_created = xTaskCreate(
             AnimationTask,
             "AnimationTask",
-            4096,
+            8192,
             this,
             5,
             &animation_task_handle_
