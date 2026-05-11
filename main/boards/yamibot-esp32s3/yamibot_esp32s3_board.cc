@@ -5,14 +5,14 @@
 #include "application.h"
 #include "button.h"
 #include "config.h"
-#include "mcp_server.h"
 #include "led/single_led.h"
 #include "assets/lang_config.h"
 #include "emoji_controller.h"
 #include "servo_controller.h"
 #include "emotion_response_controller.h"
 #include "gesture_sensor.h"
-#include "lamp_controller.h"
+// #include "mcp_server.h"
+// #include "lamp_controller.h"
 
 #include <wifi_station.h>
 #include <esp_log.h>
@@ -284,7 +284,7 @@ private:
 
     // 物联网初始化，逐步迁移到 MCP 协议
     void InitializeTools() {
-        static LampController lamp(LAMP_GPIO);
+        // static LampController lamp(LAMP_GPIO);
     }
 
     // 切换屏幕
