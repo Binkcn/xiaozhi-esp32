@@ -518,7 +518,8 @@ void EmojiDisplay::SetChatMessage(const char* role, const char* content) {
     } else if (role && strcmp(role, "user") == 0 && content && content[0] != '\0') {
         ESP_LOGI(TAG, "EmojiDisplay捕获用户消息: %s", content);
         // 直接调用YamiBotBoard的ProcessUserCommand方法处理用户消息
-        if (board_ && board_->ProcessUserCommand(content)) {
+        if (board_) {
+            board_->ProcessUserCommand(content);
             ESP_LOGI(TAG, "用户消息已处理: %s", content);
         }
     }
