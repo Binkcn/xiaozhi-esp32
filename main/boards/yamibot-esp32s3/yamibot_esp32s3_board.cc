@@ -478,18 +478,17 @@ public:
 
 // 在YamiBotBoard类定义后实现EmojiDisplay::SetChatMessage方法
 void EmojiDisplay::SetChatMessage(const char* role, const char* content) {
+    // 首先调用父类方法显示消息
+    OledDisplay::SetChatMessage(role, content);
+    
     // 检查是否正在处理AI回复，避免递归调用
     if (processing_ai_response_) {
-        // 如果正在处理AI回复，只调用父类方法显示消息，不进行额外处理
-        OledDisplay::SetChatMessage(role, content);
+        // 如果正在处理AI回复，不进行额外处理
         return;
     }
     
     // 设置标志，表示正在处理AI回复
     processing_ai_response_ = true;
-    
-    // 首先调用父类方法显示消息
-    OledDisplay::SetChatMessage(role, content);
     
     // 如果是AI回复，则处理内容
     if (role && strcmp(role, "assistant") == 0 && content && content[0] != '\0') {
@@ -516,8 +515,14 @@ void EmojiDisplay::SetChatMessage(const char* role, const char* content) {
                 }
             }
         }
+    } else if (role && strcmp(role, "user") == 0 && content && content[0] != '\0') {
+        ESP_LOGI(TAG, "EmojiDisplay捕获用户消息: %s", content);
+        // 直接调用YamiBotBoard的ProcessUserCommand方法处理用户消息
+        if (board_ && board_->ProcessUserCommand(content)) {
+            ESP_LOGI(TAG, "用户消息已处理: %s", content);
+        }
     }
-    
+
     // 重置标志
     processing_ai_response_ = false;
 }
