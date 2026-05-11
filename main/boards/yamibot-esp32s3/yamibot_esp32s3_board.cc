@@ -2,6 +2,7 @@
 #include "audio/codecs/no_audio_codec.h"
 #include "display/oled_display.h"
 #include "system_reset.h"
+#include "settings.h"
 #include "application.h"
 #include "button.h"
 #include "config.h"
@@ -260,6 +261,15 @@ private:
             codec->SetOutputVolume(volume);
             GetDisplay()->ShowNotification(Lang::Strings::VOLUME + std::to_string(volume));
         });
+
+#if CONFIG_USE_DEVICE_AEC
+        volume_up_button_.OnDoubleClick([this]() {
+            auto& app = Application::GetInstance();
+            if (app.GetDeviceState() == kDeviceStateIdle) {
+                app.SetAecMode(app.GetAecMode() == kAecOff ? kAecOnDeviceSide : kAecOff);
+            }
+        });
+#endif
 
         volume_up_button_.OnLongPress([this]() {
             GetAudioCodec()->SetOutputVolume(100);
