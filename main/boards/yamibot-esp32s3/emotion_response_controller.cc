@@ -9,7 +9,7 @@
 #include "emoji_controller.h"
 #include "servo_controller.h"
 #include "board.h"
-#include "mcp_server.h"
+// #include "mcp_server.h"
 #include "application.h"
 #include "audio/audio_codec.h"
 
@@ -68,9 +68,6 @@ void EmotionResponseController::ProcessAIResponse(const std::string& message) {
     std::string emotion = "neutral";  // 默认情感为中性
     std::string action = "";          // 默认无特定动作
     
-    // 分析文本内容，获取情感类型
-    emotion = AnalyzeText(message);
-    
     // 根据消息内容判断是否需要执行特定动作
     if (ShouldNod(message)) {
         action = "nod";
@@ -94,6 +91,9 @@ void EmotionResponseController::ProcessAIResponse(const std::string& message) {
         action = "look_down";
         ESP_LOGI(TAG, "内容提到下方，执行低头动作");
     }
+    
+    // 分析文本内容，获取情感类型
+    emotion = AnalyzeText(message);
     
     // 执行情感动作
     ESP_LOGI(TAG, "通过文本分析得到情感: %s", emotion.c_str());
